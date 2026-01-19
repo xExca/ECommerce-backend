@@ -1,6 +1,6 @@
 import type { Error } from "mongoose";
 import app from "./app.js";
-import connectDB from "./config/db.js";
+import connectDB from "./utils/connection/db.js";
 
 const PORT = process.env.PORT || 8000;
 

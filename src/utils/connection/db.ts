@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { dbUri } from './global.js';
+import { dbUri } from '../../config/global.js';
 
 const connectDB = async () => {
   await mongoose.connect(dbUri!);
