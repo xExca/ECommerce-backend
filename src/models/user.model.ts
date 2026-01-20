@@ -21,6 +21,7 @@ export interface UserType {
     croppedAreaPixels?: { x?: number; y?: number; width?: number; height?: number };
   },
   role: "user" | "admin",
+  refreshToken?: string;
   lastLoginAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -91,6 +92,7 @@ const userSchema = new mongoose.Schema({
     enum: ["user", "admin"],
     default: "user",
   },
+  refreshToken: { type: String, select: false },
   lastLoginAt: Date,
   createdAt: Date,
   updatedAt: Date,

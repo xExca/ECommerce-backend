@@ -38,11 +38,13 @@ Promise<{ user: Document<unknown, {}, UserType> & UserType, accessToken: string,
     user.picture = { originalUrl: picture, croppedUrl: picture };
   }
 
-  user.lastLoginAt = new Date();
-  await user.save();
-
   const accessToken = createAccessToken(user);
   const refreshToken = createRefreshToken(user);
+  
+  user.lastLoginAt = new Date();
+  user.refreshToken = refreshToken;
+
+  await user.save();
 
   return { user, accessToken, refreshToken };
 }

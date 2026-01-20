@@ -4,11 +4,13 @@ import { authLimiter } from '../middlewares/ratelimiter.middleware.js';
 import { googleLink, googleLogin } from '../controllers/google.controller.js';
 import { requireAuth } from '../middlewares/auth.middlware.js';
 import { facebookLink, facebookLogin } from '../controllers/facebook.controller.js';
+import { refresh } from '../controllers/refresh.controller.js';
 
 
 const router = Router();
 const limiter = ENV === 'production' ? authLimiter : (req: Request, res: Response, next : NextFunction) => next();
 
+router.post('/refresh', refresh);
 router.post('/google', limiter, googleLogin);
 router.post('/google/link', requireAuth, googleLink);
 router.post('/facebook', limiter, facebookLogin);

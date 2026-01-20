@@ -15,7 +15,7 @@ export const facebookLogin = async (req: Request, res: Response) => {
 
     sendRefreshTokenCookie(res, refreshToken);
 
-    return res.status(200).json({ user, accessToken: accessJWT, refreshToken });
+    return res.status(200).json({ user, accessToken: accessJWT });
 
   } catch (error: any) {
     console.error("Facebook login error:", error);

@@ -15,7 +15,7 @@ export const googleLogin = async (req: Request, res: Response) => {
 
     sendRefreshTokenCookie(res, refreshToken);
     
-    return res.status(200).json({ user, accessToken, refreshToken });
+    return res.status(200).json({ user, accessToken });
 
   } catch(error: any) {
     console.error("Google login error:", error);

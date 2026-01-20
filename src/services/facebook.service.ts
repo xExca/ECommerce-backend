@@ -83,17 +83,54 @@ Promise<{ user: UserTypeDocument, accessToken: string, refreshToken: string }> =
     }
   }
 
-  user.lastLoginAt = new Date();
-  await user.save();
-
   const accessTokenJWT = createAccessToken(user);
   const refreshToken = createRefreshToken(user);
-
+  
+  user.lastLoginAt = new Date();
+  user.refreshToken = refreshToken;
+  
+  await user.save();
   return { user, accessToken: accessTokenJWT, refreshToken };
 }
 
 export const linkWithFacebook = async (user: UserTypeDocument, profile: FacebookProfile, token: string):
 Promise<UserTypeDocument> => {
+  const appAccessToken = `${FACEBOOK_APP_ID}|${FACEBOOK_APP_SECRET}`;
 
+  const debugResponse = await axios.get<FacebookDebugTokenResponse>("https://graph.facebook.com/debug_token", {
+    params: {
+      input_token: token,
+      access_token: appAccessToken
+    }
+  });
+
+  const data = debugResponse.data.data;
+
+  if(!data.is_valid || data.app_id !== FACEBOOK_APP_ID) {
+    throw new Error("Invalid Facebook token");
+  }
+
+  const profileResponse = await axios.get<FacebookProfile>('https://graph.facebook.com/v19.0/me', {
+    params: {
+      fields: "id,email,first_name,last_name,picture,number",
+      access_token: token
+    }
+  });
+
+  const { id, email } = profileResponse.data;
+
+  if (!user.providers) {
+    user.providers = {};
+  }
+  if(user.providers.facebook?.id) {
+    throw new Error("Facebook is already linked");
+  }
+
+  const existing = await User.findOne({ "providers.facebook.id": id });
+  if (existing) throw new Error("This Facebook account is linked to another user");
+
+  user.providers.facebook = { id, email };
+
+  await user.save();
   return user;
 }
