@@ -4,7 +4,7 @@ import router from './routes/index.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { ENV, NGINX_URL } from './config/global.js';
-import { banCheck, globalLimiter } from './middleware/ratelimiter.middleware.js';
+import { banCheck, globalLimiter } from './middlewares/ratelimiter.middleware.js';
 
 const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) =>
   (req: Request, res: Response, next: NextFunction) => {
