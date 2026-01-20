@@ -47,11 +47,8 @@ Promise<{ user: Document<unknown, {}, UserType> & UserType, accessToken: string,
   return { user, accessToken, refreshToken };
 }
 
-export const linkGoogleAccount = async (
-  user: Document<unknown, {}, UserType> & UserType,
-  profile: GoogleProfile,
-  token: string
-): Promise<Document<unknown, {}, UserType> & UserType> => {
+export const linkGoogleAccount = async (user: Document<unknown, {}, UserType> & UserType,profile: GoogleProfile,token: string): 
+Promise<Document<unknown, {}, UserType> & UserType> => {
   const { sub: googleId, email: profileEmail, picture } = profile;
 
   if (!user.providers) user.providers = {};

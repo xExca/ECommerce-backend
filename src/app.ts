@@ -5,6 +5,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { ENV, NGINX_URL } from './config/global.js';
 import { banCheck, globalLimiter } from './middlewares/ratelimiter.middleware.js';
+import { errorHandler } from './middlewares/error.middlware.js';
 
 const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) =>
   (req: Request, res: Response, next: NextFunction) => {
@@ -26,7 +27,7 @@ if(ENV === 'production') {
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ limit: '5mb', extended: true }));
 app.use(cookieParser());
-
+app.use(errorHandler);
 
 app.use('/api', router)
 
