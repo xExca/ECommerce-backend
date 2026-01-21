@@ -1,9 +1,11 @@
 import jwt, { type JwtPayload } from "jsonwebtoken";
-import User from "../models/user.model.js";
+import User, { type UserType } from "../models/user.model.js";
 import { createAccessToken, createRefreshToken } from "../utils/jwt.js";  
 import { REFRESH_TOKEN } from "../config/global.js";
+import type { Document } from "mongoose";
 
-export const refreshSession = async (refreshToken: string) => {
+export const refreshSession = async (refreshToken: string):
+Promise<{user: Document<unknown, {}, UserType> & UserType, accessToken: string, refreshToken: string}> => {
 
   if(!refreshToken) {
     throw new Error("Refresh token not provided");
@@ -14,10 +16,6 @@ export const refreshSession = async (refreshToken: string) => {
   try {
     payload = jwt.verify(refreshToken, REFRESH_TOKEN!) as JwtPayload;
   } catch (error) {
-    throw new Error("Invalid refresh token");
-  }
-
-  if(payload.type !== "refresh") {
     throw new Error("Invalid refresh token");
   }
 
@@ -33,5 +31,5 @@ export const refreshSession = async (refreshToken: string) => {
   user.refreshToken = newRefreshToken;
   await user.save();
 
-  return { accessToken, refreshToken: newRefreshToken };
+  return { user,accessToken, refreshToken: newRefreshToken };
 }

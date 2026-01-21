@@ -5,6 +5,7 @@ import { googleLink, googleLogin } from '../controllers/google.controller.js';
 import { requireAuth } from '../middlewares/auth.middlware.js';
 import { facebookLink, facebookLogin } from '../controllers/facebook.controller.js';
 import { refresh } from '../controllers/refresh.controller.js';
+import { login, logout } from '../controllers/authentication.controller.js';
 
 
 const router = Router();
@@ -15,6 +16,7 @@ router.post('/google', limiter, googleLogin);
 router.post('/google/link', requireAuth, googleLink);
 router.post('/facebook', limiter, facebookLogin);
 router.post('/facebook/link', requireAuth, facebookLink);
-router.get('/test',  requireAuth, (req: Request, res: Response) => res.status(200).json({ message: "Hello World" }));
+router.post('/login', limiter, login);
+router.post('/logout', requireAuth, logout);
 
 export default router;
