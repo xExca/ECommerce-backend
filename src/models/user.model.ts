@@ -98,9 +98,6 @@ const userSchema = new mongoose.Schema({
   updatedAt: Date,
 });
 
-userSchema.index({ "providers.google.id": 1 }, { sparse: true });
-userSchema.index({ "providers.facebook.id": 1 }, { sparse: true });
-
 export const User = mongoose.model<IUser>("User", userSchema);
 
 export default User;
