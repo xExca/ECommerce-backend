@@ -2,6 +2,7 @@
 import { createHash } from "crypto";
 import User, { type UserType } from "../models/user.model.js";
 import OTP from "../models/otp.model.js";
+import type { HydratedDocument } from "mongoose";
 
 export const logoutUser = async (userId: string) => {
   const currentUser = await User.findOne({ _id: userId });
@@ -15,15 +16,11 @@ export const logoutUser = async (userId: string) => {
 };
 
 export const checkIfUserExists = async (identifier: string):
-Promise<{user: UserType | null}> => {
+Promise<{user: HydratedDocument<UserType> | null}> => {
   const normalized = identifier.trim().toLowerCase();
   const isEmail = normalized.includes("@");
 
   const user = isEmail ? await User.findOne({ email: normalized }) : await User.findOne({ phone: identifier.trim() });
-
-  if (!user) {
-    return  { user: null };
-  }
 
   return { user };
 };

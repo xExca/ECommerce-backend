@@ -6,6 +6,7 @@ import { requireAuth } from '../middlewares/auth.middlware.js';
 import { facebookLink, facebookLogin } from '../controllers/facebook.controller.js';
 import { refresh } from '../controllers/refresh.controller.js';
 import { login, logout } from '../controllers/authentication.controller.js';
+import { verify } from '../controllers/verification.controller.js';
 
 
 const router = Router();
@@ -18,5 +19,6 @@ router.post('/facebook', limiter, facebookLogin);
 router.post('/facebook/link', requireAuth, facebookLink);
 router.post('/login', limiter, login);
 router.post('/logout', requireAuth, logout);
+router.post('/verify', verify)
 
 export default router;
