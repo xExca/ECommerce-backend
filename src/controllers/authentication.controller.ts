@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { clearRefreshTokenCookie } from "../utils/jwt.js";
 import { checkIfUserExists, createOtpCode, logoutUser } from "../services/authentication.service.js";
 import { ENV } from "../config/global.js";
+import OTP from "../models/otp.model.js";
 
 export const logout = async(req:Request, res:Response) => {
  try{
@@ -34,10 +35,12 @@ export const login = async (req: Request, res: Response) => {
     if(!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    await OTP.deleteMany({ userId: user._id });
     
     const { otpCode, expiredAt } = await createOtpCode(user);
 
-    const response: any = { expiredAt};
+    const response: any = { expiredAt };
     if(ENV !== 'production') {  
       response.otpCode = otpCode;
     }

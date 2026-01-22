@@ -7,6 +7,7 @@ import { facebookLink, facebookLogin } from '../controllers/facebook.controller.
 import { refresh } from '../controllers/refresh.controller.js';
 import { login, logout } from '../controllers/authentication.controller.js';
 import { verify } from '../controllers/verification.controller.js';
+import { resendOtp } from '../controllers/resend.controller.js';
 
 
 const router = Router();
@@ -20,5 +21,6 @@ router.post('/facebook/link', requireAuth, facebookLink);
 router.post('/login', limiter, login);
 router.post('/logout', requireAuth, logout);
 router.post('/verify', verify)
+router.get('/resend/:identifier', limiter, resendOtp);
 
 export default router;
