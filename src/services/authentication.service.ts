@@ -39,3 +39,18 @@ Promise<{otpCode: string, expiredAt: Date}> => {
 
   return {otpCode, expiredAt};
 };
+
+export const createOtpCodeSignup = async(identifier: string):
+Promise<{otpCode: string, expiredAt: Date}> => {
+  const otpCode = (Math.floor(100000 + Math.random() * 900000)).toString();
+  const codeHash = createHash('sha256').update(otpCode).digest('hex');
+  const expiredAt = new Date(Date.now() + 5 * 60 * 1000);
+
+  await OTP.create({
+    email: identifier,
+    codeHash,
+    expiredAt
+  });
+
+  return {otpCode, expiredAt};
+}

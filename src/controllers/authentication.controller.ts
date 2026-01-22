@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { clearRefreshTokenCookie } from "../utils/jwt.js";
-import { checkIfUserExists, createOtpCode, logoutUser } from "../services/authentication.service.js";
+import { checkIfUserExists, createOtpCode, createOtpCodeSignup, logoutUser } from "../services/authentication.service.js";
 import { ENV } from "../config/global.js";
 import OTP from "../models/otp.model.js";
 
@@ -48,6 +48,40 @@ export const login = async (req: Request, res: Response) => {
     return res.status(200).json(response);
   } catch(error:any) {
     console.error('Login error:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export const signup = async (req: Request, res: Response) => {
+  try {
+    const { firstname, lastname, identifier } = req.body;
+
+    if(!firstname) {
+      return res.status(400).json({ message: 'First name is required' });
+    }
+    if(!lastname) {
+      return res.status(400).json({ message: 'Last name is required' });
+    }
+    if(!identifier) {
+      return res.status(400).json({ message: 'Identifier is required' });
+    }
+
+    const { user } = await checkIfUserExists(identifier);
+
+    if(user) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    const { otpCode, expiredAt } = await createOtpCodeSignup(identifier);
+
+    const response: any = { expiredAt };
+    if(ENV !== 'production') {  
+      response.otpCode = otpCode;
+    }
+    
+    return res.status(200).json(response);
+  } catch(error: any) {
+    console.error('Signup error:', error);
     res.status(500).json({ error: error.message });
   }
 }

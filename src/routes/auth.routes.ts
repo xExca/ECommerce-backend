@@ -5,7 +5,7 @@ import { googleLink, googleLogin } from '../controllers/google.controller.js';
 import { requireAuth } from '../middlewares/auth.middlware.js';
 import { facebookLink, facebookLogin } from '../controllers/facebook.controller.js';
 import { refresh } from '../controllers/refresh.controller.js';
-import { login, logout } from '../controllers/authentication.controller.js';
+import { login, logout, signup } from '../controllers/authentication.controller.js';
 import { verify } from '../controllers/verification.controller.js';
 import { resendOtp } from '../controllers/resend.controller.js';
 
@@ -22,5 +22,6 @@ router.post('/login', limiter, login);
 router.post('/logout', requireAuth, logout);
 router.post('/verify', verify)
 router.get('/resend/:identifier', limiter, resendOtp);
+router.post('/signup', limiter, signup);
 
 export default router;
