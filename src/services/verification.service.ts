@@ -5,6 +5,12 @@ import OTP from "../models/otp.model.js";
 import { createAccessToken, createRefreshToken } from "../utils/jwt.js";
 import { checkIfUserExists } from "./authentication.service.js";
 
+type SignUpPayload = {
+  identifier: string;
+  firstname: string;
+  lastname: string;
+}
+
 export const checkOTP = async (identifier:string , code: string):
 Promise<{user: Document<unknown, {}, UserType> & UserType, accessToken:string, refreshToken: string}> => {
   try {
@@ -48,4 +54,48 @@ Promise<{user: Document<unknown, {}, UserType> & UserType, accessToken:string, r
     console.log("Error checking OTP:", error);
     throw error;
   }
+}
+
+export const checkOtpSignup = async(payload:SignUpPayload, code: string):
+Promise<{user: Document<unknown, {}, UserType> & UserType, accessToken:string, refreshToken: string}> => {
+  const { identifier, firstname, lastname } = payload;
+  const codeHash = createHash('sha256').update(String(code)).digest('hex');
+  const now = new Date();
+
+  const otpCheck = await OTP.findOne({
+    email: identifier,
+    codeHash,
+    used: false,
+    expiredAt: { $gt: now },
+  });
+
+  if (!otpCheck) {
+    throw new Error("Invalid code.");
+  }
+
+  if(otpCheck.expiredAt < now) {
+    throw new Error("Code has expired.");
+  }
+
+  otpCheck.used = true;
+  await otpCheck.save();
+
+  const isEmail = identifier.includes("@");
+
+  const user = await User.create({
+    email: isEmail ? identifier : "",
+    phone: isEmail ? "" : identifier.trim(),
+    role: "user",
+    firstname,
+    lastname,
+    lastLoginAt: now,
+  });
+
+  const accessToken = createAccessToken(user);
+  const refreshToken = createRefreshToken(user);
+
+  user.refreshToken = refreshToken;
+  await user.save();
+
+  return { user, accessToken, refreshToken };
 }

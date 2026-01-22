@@ -6,7 +6,7 @@ import { requireAuth } from '../middlewares/auth.middlware.js';
 import { facebookLink, facebookLogin } from '../controllers/facebook.controller.js';
 import { refresh } from '../controllers/refresh.controller.js';
 import { login, logout, signup } from '../controllers/authentication.controller.js';
-import { verify } from '../controllers/verification.controller.js';
+import { verify, verifySignupOtp } from '../controllers/verification.controller.js';
 import { resendOtp } from '../controllers/resend.controller.js';
 
 
@@ -23,5 +23,6 @@ router.post('/logout', requireAuth, logout);
 router.post('/verify', verify)
 router.get('/resend/:identifier', limiter, resendOtp);
 router.post('/signup', limiter, signup);
+router.post('/signup/verify', verifySignupOtp);
 
 export default router;
