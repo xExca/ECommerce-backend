@@ -67,6 +67,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true,
     trim: true,
+    default: "",
   },
   providers: {
     google: providerSchema,
