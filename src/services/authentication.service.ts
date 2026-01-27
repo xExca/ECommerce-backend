@@ -2,7 +2,7 @@
 import { createHash } from "crypto";
 import User, { type UserType } from "../models/user.model.js";
 import OTP from "../models/otp.model.js";
-import type { HydratedDocument } from "mongoose";
+import { isValidObjectId, type HydratedDocument } from "mongoose";
 
 export const logoutUser = async (userId: string) => {
   const currentUser = await User.findOne({ _id: userId });
@@ -24,6 +24,22 @@ Promise<{user: HydratedDocument<UserType> | null}> => {
 
   return { user };
 };
+
+export const checkUserById = async (userId: string):
+Promise<{user: HydratedDocument<UserType> | null}> => {
+  try {
+    
+    if(!isValidObjectId(userId)) {
+      throw new Error("User id is invalid");
+    }
+    const user = await User.findById(userId);
+
+    return { user };
+  } catch (error: any) {
+    console.log("Check user by id error:", error);
+    throw new Error(error.message);
+  }
+}
 
 export const createOtpCode = async(user: UserType ):
 Promise<{otpCode: string, expiredAt: Date}> => {

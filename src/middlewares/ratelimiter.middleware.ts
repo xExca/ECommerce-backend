@@ -1,6 +1,7 @@
 import rateLimit from "express-rate-limit";
 import type { Request, Response, NextFunction } from "express";
 import redis from "../utils/connection/redisClient.js";
+import { ENV } from "../config/global.js";
 
 export const banCheck = async (req: Request, res: Response, next: NextFunction) => {
  try{
@@ -96,3 +97,5 @@ export const authLimiter = rateLimit({
   },
 });
 
+
+export const limiter = ENV === 'production' ? authLimiter : (req: Request, res: Response, next: NextFunction) => next();
