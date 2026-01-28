@@ -1,32 +1,25 @@
 import type { NextFunction, Request, Response } from "express";
 import { checkUserById } from "../services/authentication.service.js";
-import { getAllUsers, userDelete, userUpdate } from "../services/user.service.js";
+import { getAllUsers, userDelete, userUpdate, type UserUpdatePayload } from "../services/user.service.js";
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.params;
-    const payload = req.body;
-    if (!userId) {
-      throw new Error("User id is required");
-    }
-
-    if (!payload.firstname || !payload.lastname) {
-      throw new Error("First name and last name are required");
-    }
+    const payload: UserUpdatePayload = req.body;
+    const authUser = req.user;
 
     const { user } = await checkUserById(String(userId));
 
     if (!user) {
       throw new Error("User not found");
     }
-    
-    const { message } = await userUpdate(String(userId), payload);
 
-    return res.status(200).json({ message });
+    const { user: updatedUser, accessToken } = await userUpdate({ userId: String(userId), authUser, payload, });
 
+    return res.status(200).json({ user: updatedUser, accessToken });
   } catch (error: any) {
     console.log("Update user error:", error);
-    throw new Error(error.message);
+    return res.status(500).json({ message: error.message });
   }
 }
 

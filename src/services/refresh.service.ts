@@ -3,9 +3,10 @@ import User, { type UserType } from "../models/user.model.js";
 import { createAccessToken, createRefreshToken } from "../utils/jwt.js";  
 import { REFRESH_TOKEN } from "../config/global.js";
 import type { Document } from "mongoose";
+import type { UserTypeDocument } from "../types/user.type.js";
 
 export const refreshSession = async (refreshToken: string):
-Promise<{user: Document<unknown, {}, UserType> & UserType, accessToken: string, refreshToken: string}> => {
+Promise<{user: UserTypeDocument, accessToken: string, refreshToken: string}> => {
 
   if(!refreshToken) {
     throw new Error("Refresh token not provided");

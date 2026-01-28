@@ -4,6 +4,7 @@ import type { Response } from "express";
 import type { Document } from "mongoose";
 import { ACCESS_TOKEN } from "../config/global.js";
 import { sign } from "node:crypto";
+import type { UserTypeDocument } from "../types/user.type.js";
 
 interface JWTUserPayload {
   userId: string;
@@ -11,11 +12,11 @@ interface JWTUserPayload {
   email: string;
 }
 
-const getUserId = (user: Document<unknown, {}, UserType> & UserType | UserType): string => {
+const getUserId = (user: UserTypeDocument | UserType): string => {
   return (user as any)._id.toString();
 };
 
-export const createAccessToken = (user:Document<unknown, {}, UserType> & UserType | UserType):string => {
+export const createAccessToken = (user:UserTypeDocument | UserType):string => {
 
   if(!ACCESS_TOKEN) {
     throw new Error("ACCESS_TOKEN is not defined");
@@ -30,7 +31,7 @@ export const createAccessToken = (user:Document<unknown, {}, UserType> & UserTyp
   return jwt.sign(payload, ACCESS_TOKEN, {expiresIn: "15m"});
 }
 
-export const createRefreshToken = (user: Document<unknown, {}, UserType> & UserType | UserType ): string => {
+export const createRefreshToken = (user: UserTypeDocument | UserType ): string => {
   if (!process.env.REFRESH_TOKEN) throw new Error("REFRESH_TOKEN is not defined");
 
   const payload: JWTUserPayload = {

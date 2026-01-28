@@ -2,6 +2,7 @@ import type { Document } from "mongoose";
 import type { UserType } from "../models/user.model.js";
 import User from "../models/user.model.js";
 import { createAccessToken, createRefreshToken, sendRefreshTokenCookie } from "../utils/jwt.js";
+import type { UserTypeDocument } from "../types/user.type.js";
 
 interface GoogleProfile {
   sub: string;
@@ -12,14 +13,14 @@ interface GoogleProfile {
 }
 
 export const loginWithGoogle = async (profile: GoogleProfile, token: string):
-Promise<{ user: Document<unknown, {}, UserType> & UserType, accessToken: string, refreshToken: string }>  => {
+Promise<{ user: UserTypeDocument, accessToken: string, refreshToken: string }>  => {
   const { sub: googleId, email, given_name: firstname, family_name: lastname, picture } = profile;
 
   if (!email) throw new Error("Google account does not provide an email.");
 
   const normalizedEmail = email.trim().toLowerCase();
 
-  let user = await User.findOne({ "providers.google.id": googleId }) as (Document<unknown, {}, UserType> & UserType) | null;
+  let user = await User.findOne({ "providers.google.id": googleId }) as (UserTypeDocument) | null;
 
   if (!user) {
     const emailUser = await User.findOne({ email: normalizedEmail });
@@ -31,7 +32,7 @@ Promise<{ user: Document<unknown, {}, UserType> & UserType, accessToken: string,
       lastname,
       role: "user",
       ...(picture && { picture: { originalUrl: picture, croppedUrl: picture } }),
-    }) as Document<unknown, {}, UserType> & UserType;
+    }) as UserTypeDocument;
   }
 
   if (picture && (!user.picture?.originalUrl || !user.picture?.croppedUrl)) {
@@ -49,8 +50,8 @@ Promise<{ user: Document<unknown, {}, UserType> & UserType, accessToken: string,
   return { user, accessToken, refreshToken };
 }
 
-export const linkGoogleAccount = async (user: Document<unknown, {}, UserType> & UserType,profile: GoogleProfile,token: string): 
-Promise<Document<unknown, {}, UserType> & UserType> => {
+export const linkGoogleAccount = async (user: UserTypeDocument,profile: GoogleProfile,token: string): 
+Promise<UserTypeDocument> => {
   const { sub: googleId, email: profileEmail, picture } = profile;
 
   if (!user.providers) user.providers = {};

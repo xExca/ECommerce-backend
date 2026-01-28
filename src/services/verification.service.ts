@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import OTP from "../models/otp.model.js";
 import { createAccessToken, createRefreshToken } from "../utils/jwt.js";
 import { checkIfUserExists } from "./authentication.service.js";
+import type { UserTypeDocument } from "../types/user.type.js";
 
 type SignUpPayload = {
   identifier: string;
@@ -12,7 +13,7 @@ type SignUpPayload = {
 }
 
 export const checkOTP = async (identifier:string , code: string):
-Promise<{user: Document<unknown, {}, UserType> & UserType, accessToken:string, refreshToken: string}> => {
+Promise<{user: UserTypeDocument, accessToken:string, refreshToken: string}> => {
   try {
     const { user } = await checkIfUserExists(identifier);
 
@@ -57,7 +58,7 @@ Promise<{user: Document<unknown, {}, UserType> & UserType, accessToken:string, r
 }
 
 export const checkOtpSignup = async(payload:SignUpPayload, code: string):
-Promise<{user: Document<unknown, {}, UserType> & UserType, accessToken:string, refreshToken: string}> => {
+Promise<{user: UserTypeDocument, accessToken:string, refreshToken: string}> => {
   try {
     const { identifier, firstname, lastname } = payload;
     

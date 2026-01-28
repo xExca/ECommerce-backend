@@ -1,13 +1,16 @@
 import User, { type UserType } from "../models/user.model.js";
+import type { UserTypeDocument, UserUpdatePayload } from "../types/user.type.js";
+import { createAccessToken, createRefreshToken } from "../utils/jwt.js";
 
 interface Providers {
   google: boolean,  
   facebook: boolean 
 }
 
-interface TestUpdate {
-  firstname: string,
-  lastname: string
+interface UpdateUserServiceParams {
+  userId: string;
+  authUser: UserTypeDocument;
+  payload: UserUpdatePayload;
 }
 
 export const getLinkedAccount = async (userId:string):
@@ -31,19 +34,42 @@ Promise<{providers: Providers}> => {
   }
 };
 
-export const userUpdate = async (userId: string, payload: TestUpdate):
-  Promise<{ message: string }> => {
+export const userUpdate = async ({userId, authUser,payload}: UpdateUserServiceParams):
+Promise<{ user: UserTypeDocument, accessToken: string  }> => {
   try {
     const user = await User.findById(userId);
 
     if(!user) {
       throw new Error("There is no user with this id");
     }
+    const isSelf = authUser._id.equals(user._id);
+    const isAdmin = authUser.role === "admin";
+
+    if(!isSelf && !isAdmin) {
+      throw new Error("You are not authorized to update this user");
+    }
+
     user.firstname = payload.firstname;
     user.lastname = payload.lastname;
+    user.email = payload.email;
+    user.phone = payload.phone;
+
+    if (isAdmin && payload.role) {
+      user.role = payload.role;
+    }
+
     await user.save();
 
-    return { message: "User updated successfully" };
+    const accessToken = createAccessToken(user);
+    const refreshToken = createRefreshToken(user);
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    return { 
+      user,
+      accessToken,
+    };
     
   } catch (error: any) {
     console.log("Update user error:", error);
