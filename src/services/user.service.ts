@@ -1,6 +1,5 @@
 import User, { type UserType } from "../models/user.model.js";
 import type { UserTypeDocument, UserUpdatePayload } from "../types/user.type.js";
-import { createAccessToken, createRefreshToken } from "../utils/jwt.js";
 
 interface Providers {
   google: boolean,  
@@ -35,7 +34,7 @@ Promise<{providers: Providers}> => {
 };
 
 export const userUpdate = async ({userId, authUser,payload}: UpdateUserServiceParams):
-Promise<{ user: UserTypeDocument, accessToken: string  }> => {
+Promise<{ user: UserTypeDocument }> => {
   try {
     const user = await User.findById(userId);
 
@@ -59,17 +58,8 @@ Promise<{ user: UserTypeDocument, accessToken: string  }> => {
     }
 
     await user.save();
-
-    const accessToken = createAccessToken(user);
-    const refreshToken = createRefreshToken(user);
-
-    user.refreshToken = refreshToken;
-    await user.save();
-
-    return { 
-      user,
-      accessToken,
-    };
+    
+    return { user };
     
   } catch (error: any) {
     console.log("Update user error:", error);

@@ -15,9 +15,9 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
       throw new Error("User not found");
     }
 
-    const { user: updatedUser, accessToken } = await userUpdate({ userId: String(userId), authUser, payload, });
+    const { user: updatedUser } = await userUpdate({ userId: String(userId), authUser, payload, });
 
-    return res.status(200).json({ user: updatedUser, accessToken });
+    return res.status(200).json({ user: updatedUser });
   } catch (error: any) {
     console.log("Update user error:", error);
     return res.status(500).json({ message: error.message });

@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import type { UserType } from "../models/user.model.js";
 import type { Response } from "express";
 import type { Document } from "mongoose";
-import { ACCESS_TOKEN } from "../config/global.js";
+import { ACCESS_TOKEN, ENV, REFRESH_TOKEN } from "../config/global.js";
 import { sign } from "node:crypto";
 import type { UserTypeDocument } from "../types/user.type.js";
 
@@ -28,11 +28,11 @@ export const createAccessToken = (user:UserTypeDocument | UserType):string => {
     email: user.email,
   };
 
-  return jwt.sign(payload, ACCESS_TOKEN, {expiresIn: "15m"});
+  return jwt.sign(payload, ACCESS_TOKEN, {expiresIn: "5s"});
 }
 
 export const createRefreshToken = (user: UserTypeDocument | UserType ): string => {
-  if (!process.env.REFRESH_TOKEN) throw new Error("REFRESH_TOKEN is not defined");
+  if (!REFRESH_TOKEN) throw new Error("REFRESH_TOKEN is not defined");
 
   const payload: JWTUserPayload = {
     userId: getUserId(user),
@@ -40,17 +40,17 @@ export const createRefreshToken = (user: UserTypeDocument | UserType ): string =
     email: user.email,
   };
 
-  return jwt.sign(payload, process.env.REFRESH_TOKEN, { expiresIn: "15d" });
+  return jwt.sign(payload, REFRESH_TOKEN, { expiresIn: "15d" });
 };
 
 export const sendRefreshTokenCookie = (res: Response, refreshToken: string) => {
-  res.cookie("refreshToken", refreshToken, 
-    { httpOnly: true, 
-      secure: true, 
-      sameSite: "strict",
-      path: "/api/auth/refresh",
-      maxAge: 1000 * 60 * 60 * 24 * 15 
-    });
+   res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: ENV === "production",
+    sameSite: ENV === "production" ? "none" : "lax",
+    path: "/api/auth",
+    maxAge: 1000 * 60 * 60 * 24 * 15,
+  });
 }
 
 

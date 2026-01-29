@@ -17,7 +17,7 @@ router.post('/google/link', requireAuth, googleLink);
 router.post('/facebook', limiter, facebookLogin);
 router.post('/facebook/link', requireAuth, facebookLink);
 router.post('/login', limiter, login);
-router.post('/logout', requireAuth, logout);
+router.post('/logout', logout);
 router.post('/verify', verify)
 router.get('/resend/:identifier', limiter, resendOtp);
 router.post('/signup', limiter, signup);
