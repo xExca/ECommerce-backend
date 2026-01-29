@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { checkUserById } from "../services/authentication.service.js";
-import { getAllUsers, userDelete, userUpdate, type UserUpdatePayload } from "../services/user.service.js";
+import { getAllUsers, userDelete, userUpdate } from "../services/user.service.js";
+import type { UserUpdatePayload } from "../types/user.type.js";
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {

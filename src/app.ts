@@ -9,12 +9,12 @@ import { errorHandler } from './middlewares/error.middlware.js';
 
 const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) =>
   (req: Request, res: Response, next: NextFunction) => {
-    fn(req, res, next).catch(next); // catch errors
+    fn(req, res, next).catch(next);
   };
 
 const app = express();
 app.use(cors({
-  origin: [NGINX_URL, 'http://localhost:3000'],
+  origin: NGINX_URL,
   credentials: true
 }));
 

@@ -74,7 +74,10 @@ export const signup = async (req: Request, res: Response) => {
 
     const { otpCode, expiredAt } = await createOtpCodeSignup(identifier);
 
-    const response: any = { expiredAt };
+    const response: any = { 
+      expiredAt,
+      message: 'Otp code has been sent to your email',
+    };
     if(ENV !== 'production') {  
       response.otpCode = otpCode;
     }
