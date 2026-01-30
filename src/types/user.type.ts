@@ -11,3 +11,19 @@ export interface UserUpdatePayload {
   phone: string,
   role?: "user" | "admin"
 }
+
+export interface updateAvatarPayload {
+  cropArea: {
+    crop: {
+      x: number,
+      y: number
+    },
+    zoom: number,
+    croppedAreaPixels: {
+      x: number,
+      y: number,
+      width: number,
+      height: number
+    }
+  }
+}

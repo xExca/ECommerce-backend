@@ -28,7 +28,7 @@ export const createAccessToken = (user:UserTypeDocument | UserType):string => {
     email: user.email,
   };
 
-  return jwt.sign(payload, ACCESS_TOKEN, {expiresIn: "5s"});
+  return jwt.sign(payload, ACCESS_TOKEN, {expiresIn: "15m"});
 }
 
 export const createRefreshToken = (user: UserTypeDocument | UserType ): string => {
