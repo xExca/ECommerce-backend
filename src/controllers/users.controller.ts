@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { checkUserById } from "../services/authentication.service.js";
-import { getAllUsers, userDelete, userUpdate } from "../services/user.service.js";
+import { getAllUsers, getUserAvatarCrop, userDelete, userUpdate } from "../services/user.service.js";
 import type { UserUpdatePayload, updateAvatarPayload } from "../types/user.type.js";
 import { updateAvatarService } from "../services/avatar.service.js";
 
@@ -90,25 +90,40 @@ export const updateAvatar = async (req: Request<{}, {}, updateAvatarPayload>, re
     const { _id } = req.user;
     const { cropArea } = req.body;
 
+    if (!_id) throw new Error("Not Authorized");
+    if (!cropArea) throw new Error("Crop area is required");
+
+    const picture = await updateAvatarService({ userId: _id, cropArea, fileBuffer: req.file?.buffer });
+
+    return res.status(200).json({
+      message: "Avatar updated successfully",
+      picture: picture.picture,
+    });
+
+  } catch (err: any) {
+    console.error("Update avatar error:", err);
+    return res.status(500).json({ message: err.message });
+  }
+}
+
+export const getCropArea = async (req: Request, res: Response) => {
+  try {
+    const { _id } = req.user;
+
     if (!_id) {
       throw new Error("Not Authorized");
     }
-    if (!cropArea) {
-      throw new Error("Crop area is required");
+
+    const avatarCrop = await getUserAvatarCrop(_id);
+
+    if (!avatarCrop) {
+      throw new Error("Avatar not found");
     }
 
-    const fileBuffer = req.file?.buffer;
-    if (!fileBuffer) {
-      throw new Error("Avatar is required");
-    }
+    return res.status(200).json(avatarCrop);
 
-    const picture = await updateAvatarService({ userId: _id, cropArea, fileBuffer });
-
-    return res.status(200).json({ message: "Avatar updated successfully", picture });
-
-  } catch (err:any) {
-    console.log("Update avatar error:", err);
-    return res.status(500).json({ message: err.message });
-  } 
+  } catch(error:any) {
+    console.log("Get crop area error:", error);
+    return res.status(500).json({ message: error.message });
+  }
 }
-

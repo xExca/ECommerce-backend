@@ -1,7 +1,8 @@
-import fs from "fs/promises";
 import path from "path";
 import sharp from "sharp";
 import User from "../models/user.model.js";
+import fs from "fs/promises";
+import { existsSync } from "fs";
 
 interface CropArea {
   crop: { x: number; y: number };
@@ -12,14 +13,11 @@ interface CropArea {
 interface UpdateAvatarOptions {
   userId: string;
   cropArea: CropArea;
-  fileBuffer?: Buffer;
+  fileBuffer?: Buffer | undefined;
 }
 
-export const updateAvatarService = async ({
-  userId,
-  cropArea,
-  fileBuffer,
-}: UpdateAvatarOptions) => {
+export const updateAvatarService = async ({ userId, cropArea, fileBuffer}: UpdateAvatarOptions):
+Promise<{ picture: { originalUrl: string; croppedUrl: string; updatedAt: Date } }> => {
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found");
 
@@ -33,15 +31,13 @@ export const updateAvatarService = async ({
 
   if (fileBuffer) {
     image = fileBuffer;
-    // save original
     await fs.writeFile(originalPath, image);
   } else {
-    if (!user.picture?.originalUrl) {
-      throw new Error("No existing profile image found. Please upload an image first.");
+    try {
+      image = await fs.readFile(originalPath);
+    } catch {
+      throw new Error("No existing profile image found");
     }
-
-    const existingOriginalPath = path.join(process.cwd(), "public", user.picture.originalUrl);
-    image = await fs.readFile(existingOriginalPath);
   }
 
   const { x, y, width, height } = cropArea.croppedAreaPixels;
@@ -67,5 +63,5 @@ export const updateAvatarService = async ({
   user.avatarCrop = cropArea;
   await user.save();
 
-  return pictureData;
+  return { picture: pictureData };
 };

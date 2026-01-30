@@ -12,6 +12,12 @@ interface UpdateUserServiceParams {
   payload: UserUpdatePayload;
 }
 
+interface AvatarCrop  {
+  crop: { x: number; y: number };
+  zoom: number;
+  croppedAreaPixels: { x: number; y: number; width: number; height: number };
+}
+
 export const getLinkedAccount = async (userId:string):
 Promise<{providers: Providers}> => {
   try{
@@ -94,6 +100,37 @@ Promise<{message: string}> => {
     return { message: "User deleted successfully" };
   } catch (error: any) {
     console.log("Delete user error:", error);
+    throw new Error(error.message);
+  }
+}
+
+export const getUserAvatarCrop = async (_id:string):
+Promise<{avatarCrop: AvatarCrop | null}> => {
+ try {
+    const user = await User.findById(_id).select("avatarCrop").exec();
+
+    const crop = user?.avatarCrop?.crop;
+    const croppedAreaPixels = user?.avatarCrop?.croppedAreaPixels;
+    const zoom = user?.avatarCrop?.zoom;
+
+    if (!crop || crop.x === undefined || crop.y === undefined) return { avatarCrop: null };
+    if (!croppedAreaPixels || croppedAreaPixels.x === undefined || croppedAreaPixels.y === undefined || croppedAreaPixels.width === undefined || croppedAreaPixels.height === undefined) return { avatarCrop: null };
+    if (zoom === undefined) return { avatarCrop: null };
+
+    return {
+      avatarCrop: {
+        crop: { x: crop.x, y: crop.y },
+        zoom,
+        croppedAreaPixels: {
+          x: croppedAreaPixels.x,
+          y: croppedAreaPixels.y,
+          width: croppedAreaPixels.width,
+          height: croppedAreaPixels.height,
+        },
+      },
+    };
+  } catch (error: any) {
+    console.log("Get user avatar crop error:", error);
     throw new Error(error.message);
   }
 }
