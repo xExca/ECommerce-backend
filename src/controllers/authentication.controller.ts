@@ -3,24 +3,29 @@ import { clearRefreshTokenCookie } from "../utils/jwt.js";
 import { checkIfUserExists, createOtpCode, createOtpCodeSignup, logoutUser } from "../services/authentication.service.js";
 import { ENV } from "../config/global.js";
 import OTP from "../models/otp.model.js";
+import User from "../models/user.model.js";
 
-export const logout = async(req:Request, res:Response) => {
- try{
-    const user = req.user;
-    
-    if (!user) {
-      return res.status(401).json({ message: "Not authenticated"});
+export const logout = async (req: Request, res: Response) => {
+  try {
+    const { refreshToken } = req.cookies;
+
+    if (refreshToken) {
+      const user = await User.findOne({ refreshToken });
+      if (user) {
+        user.refreshToken = "";
+        await user.save();
+      }
     }
 
-    await logoutUser(user._id); 
-
     clearRefreshTokenCookie(res);
-    res.status(200).json({ message: 'Logout successful' });
- } catch (error:any) {
-    console.error('Logout error:', error);
-    res.status(500).json({ error: error.message });
+    return res.status(200).json({ message: "Logout successful" });
+
+  } catch (error: any) {
+    console.error("Logout error:", error);
+    return res.status(500).json({ message: error.message });
   }
-}
+};
+
 
 export const login = async (req: Request, res: Response) => {
   try {
@@ -74,7 +79,10 @@ export const signup = async (req: Request, res: Response) => {
 
     const { otpCode, expiredAt } = await createOtpCodeSignup(identifier);
 
-    const response: any = { expiredAt };
+    const response: any = { 
+      expiredAt,
+      message: 'Otp code has been sent to your email',
+    };
     if(ENV !== 'production') {  
       response.otpCode = otpCode;
     }

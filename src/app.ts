@@ -6,15 +6,16 @@ import cookieParser from 'cookie-parser';
 import { ENV, NGINX_URL } from './config/global.js';
 import { banCheck, globalLimiter } from './middlewares/ratelimiter.middleware.js';
 import { errorHandler } from './middlewares/error.middlware.js';
+import path from 'node:path';
 
 const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<any>) =>
   (req: Request, res: Response, next: NextFunction) => {
-    fn(req, res, next).catch(next); // catch errors
+    fn(req, res, next).catch(next);
   };
 
 const app = express();
 app.use(cors({
-  origin: [NGINX_URL, 'http://localhost:3000'],
+  origin: NGINX_URL,
   credentials: true
 }));
 
@@ -23,7 +24,7 @@ if(ENV === 'production') {
   app.use(asyncHandler(banCheck));
   app.use(globalLimiter);
 }
-
+app.use("/uploads", cors(), express.static(path  .join(process.cwd(), "public/uploads")));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ limit: '5mb', extended: true }));
 app.use(cookieParser());

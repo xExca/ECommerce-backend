@@ -1,35 +1,28 @@
 import jwt, { type JwtPayload } from "jsonwebtoken";
-import User, { type UserType } from "../models/user.model.js";
-import { createAccessToken, createRefreshToken } from "../utils/jwt.js";  
+import User from "../models/user.model.js";
+import { createAccessToken } from "../utils/jwt.js";  
 import { REFRESH_TOKEN } from "../config/global.js";
-import type { Document } from "mongoose";
+import type { UserTypeDocument } from "../types/user.type.js";
 
 export const refreshSession = async (refreshToken: string):
-Promise<{user: Document<unknown, {}, UserType> & UserType, accessToken: string, refreshToken: string}> => {
-
-  if(!refreshToken) {
-    throw new Error("Refresh token not provided");
-  }
-
+Promise<{ accessToken: string}> => {
   let payload: JwtPayload;
 
   try {
     payload = jwt.verify(refreshToken, REFRESH_TOKEN!) as JwtPayload;
-  } catch (error) {
-    throw new Error("Invalid refresh token");
+  } catch {
+    throw new Error("Invalid refresh token 1");
   }
 
-  const user = await User.findById(payload.userId);
-  
-  if(!user || user.refreshToken !== refreshToken) {
-    throw new Error("Invalid refresh token");
+  const user = await User.findById(payload.userId).select("+refreshToken");;
+  if (!user) {
+    throw new Error("Invalid refresh token 2");
+  }
+
+  if (user.refreshToken !== refreshToken) {
+    throw new Error("Invalid refresh token 3");
   }
 
   const accessToken = createAccessToken(user);
-  const newRefreshToken = createRefreshToken(user);
-
-  user.refreshToken = newRefreshToken;
-  await user.save();
-
-  return { user,accessToken, refreshToken: newRefreshToken };
+  return { accessToken };
 }

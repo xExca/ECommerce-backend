@@ -3,6 +3,7 @@ import { FACEBOOK_APP_ID, FACEBOOK_APP_SECRET } from "../config/global.js";
 import User, { type UserType } from "../models/user.model.js";
 import { Document } from "mongoose";
 import { createAccessToken, createRefreshToken, sendRefreshTokenCookie } from "../utils/jwt.js";
+import type { UserTypeDocument } from "../types/user.type.js";
 
 export interface FacebookProfile {
   id: string;
@@ -12,7 +13,6 @@ export interface FacebookProfile {
   picture?: { data: { url: string } };
 }
 
-type UserTypeDocument = Document<unknown, {}, UserType> & UserType;
 
 interface FacebookDebugTokenResponse {
   data: {
