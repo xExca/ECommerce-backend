@@ -55,6 +55,11 @@ export const sendRefreshTokenCookie = (res: Response, refreshToken: string) => {
 
 
 export const clearRefreshTokenCookie = (res: Response) => {
-  res.clearCookie("refreshToken", { path: "/api/auth/refresh" });
+  res.clearCookie("refreshToken", {
+    path: "/api/auth",
+    httpOnly: true,
+    sameSite: ENV === "production" ? "none" : "lax",
+    secure: ENV === "production",
+  });
 };
 
